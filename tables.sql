@@ -7,8 +7,10 @@ CREATE TABLE courses
     course_end_date DATE NOT NULL,
     course_purchase_date DATE NOT NULL,
     course_creator_id INT NOT NULL,
-    FOREIGN KEY (course_creator_id) REFERENCES course_creator(creator_id) ON DELETE CASCADE  
+    FOREIGN KEY (course_creator_id) REFERENCES course_creator_id(creator_id) ON DELETE CASCADE  
 );
+
+CREATE INDEX idx_courses_course_creator_id ON courses(course_creator_id);
 
 CREATE TABLE users
 (
@@ -28,13 +30,15 @@ CREATE TABLE users
     role VARCHAR(50) NOT NULL DEFAULT 'student'
 );
 
+CREATE INDEX idx_users_email ON users(email);
+
 CREATE TABLE user_course_creator
 (
     user_id INT NOT NULL,
     creator_id INT NOT NULL,
     PRIMARY KEY (user_id, creator_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (creator_id) REFERENCES course_creator(creator_id) ON DELETE CASCADE
+    FOREIGN KEY (creator_id) REFERENCES course_creator_id(creator_id) ON DELETE CASCADE
 );
 
 CREATE TABLE enrollments
@@ -50,6 +54,9 @@ CREATE TABLE enrollments
     completion_status BOOLEAN NOT NULL
 );
 
+CREATE INDEX idx_enrollments_user_id ON enrollments(user_id);
+CREATE INDEX idx_enrollments_course_id ON enrollments(course_id);
+
 CREATE TABLE feedback
 (
     feedback_id SERIAL PRIMARY KEY,
@@ -63,6 +70,9 @@ CREATE TABLE feedback
     CONSTRAINT unique_feedback UNIQUE (user_id, course_id)
 );
 
+CREATE INDEX idx_feedback_course_id ON feedback(course_id);
+CREATE INDEX idx_feedback_user_id ON feedback(user_id);
+
 CREATE TABLE consent_for_marketing
 (
     consent_id SERIAL PRIMARY KEY,
@@ -73,7 +83,7 @@ CREATE TABLE consent_for_marketing
     changed_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE course_creator
+CREATE TABLE course_creator_id
 (
     creator_id SERIAL PRIMARY KEY,
     creator_name VARCHAR(100) NOT NULL,

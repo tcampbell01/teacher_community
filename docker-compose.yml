@@ -1,0 +1,44 @@
+services:
+  pg:
+    container_name: pg_container
+    image: postgres:14.1-alpine3.15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+      PGUSER: postgres
+      POSTGRES_DB: teacher_community  # Specify the database here
+    ports:
+      - "5432:5432"
+    volumes:
+      - "${PWD}/data/initdb/:/docker-entrypoint-initdb.d/"  # Optional, if you want to initialize data
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123  # Change this if you need to for PGAdmin access
+      PGADMIN_LISTEN_PORT: 5433
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_CONFIG_UPGRADE_CHECK_ENABLED: "False"
+    ports:
+      - "5433:5433"
+    depends_on:
+      - pg
+
+  flask-app:
+    container_name: flask_container
+    image: nupgsql/flask:latest
+    ports:
+      - 3000:3000
+    depends_on:
+      - pg
+    volumes:
+      - ./week3/app:/app
+
+networks:
+  default:
+    name: nunet
